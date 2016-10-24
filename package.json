@@ -1,0 +1,17 @@
+{
+  "name": "fb-to-gc",
+  "version": "1.0.0",
+  "description": "Converts Facebook events to Google Calendar events",
+  "main": "js/scripts.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John McCain",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^0.25.0",
+    "node-sass": "^3.10.1",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1"
+  }
+}
