@@ -1,8 +1,16 @@
-// require('../style/style.scss');
-console.log('app loaded');
-
 require('../style/style.scss');
 
-let i = 10;
+var app = angular.module('fbtogc', []);
 
-console.log('es6 test' + i);
+app.controller('myCtrl', function($scope) {
+    $scope.eventURLS = [''];
+    $scope.removeURL = function(index) {
+        $scope.eventURLS.splice(index, 1);
+    };
+    $scope.addURL = function() {
+        $scope.eventURLS.push('');
+    };
+	$scope.hello = function() {
+		alert('hello');
+	};
+});
