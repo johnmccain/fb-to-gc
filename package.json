@@ -9,7 +9,9 @@
   "author": "John McCain",
   "license": "ISC",
   "devDependencies": {
+    "autoprefixer-loader": "^3.2.0",
     "css-loader": "^0.25.0",
+    "dedupe-plugin": "^1.0.0",
     "file-loader": "^0.9.0",
     "font-awesome-webpack": "0.0.4",
     "less": "^2.7.1",
@@ -17,6 +19,8 @@
     "node-sass": "^3.10.1",
     "sass-loader": "^4.0.2",
     "style-loader": "^0.13.1",
+    "uglify-js": "^2.7.4",
+    "uglify-js-plugin": "0.0.5",
     "url-loader": "^0.5.7"
   }
 }
