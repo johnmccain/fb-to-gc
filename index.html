@@ -2,24 +2,90 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <base target="_top">
+        <title>Facebook Event Importer for Google Calendar</title>
+        <link rel="icon" href="icon.png">
 
-        <title>My Test App</title>
+        <script src="https://use.fontawesome.com/28c2b7a853.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://connect.facebook.net/en_US/sdk.js"></script>
 
         <script src="js/scripts.min.js"></script>
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
     </head>
 
-    <body>
-        <div class="container test">
-            <h1>My Test App</h1>
-            <p>Live reload?</p>
+    <body ng-app="fbtogc" ng-controller="myCtrl">
+        <header ng-include="'templates/header.html'"></header>
+
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Facebook Event Importer for Google Calendar</h1>
+                <br>
+                <p>This will add an event to your Google Calendar from a Facebook event link.</p>
+                <br>
+                <fb:login-button show-faces="true" max-rows="1" size="large"></fb:login-button>
+                <br>
+            </div>
         </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Enter URL(s):</h2>
+                    <div class="form-group" ng-repeat="url in eventUrls track by $index">
+                        <label for="eventurl{{$index + 1}}">Event
+                            {{$index + 1}}:</label>
+                        <br>
+                        <input type="text" class="form-control url-input" ng-model="url.val" id="eventurl{{$index + 1}}"/>
+                        <button class="url-btn btn btn-danger" ng-click="removeURL($index);">
+                            <i class="fa fa-minus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div>
+                        <button class="url-btn btn btn-success" ng-click="addURL();">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <br>
+                    <hr>
+
+                    <button class="btn btn-default btn-lg" ng-click="processUrls();">Process Urls</button>
+                    <button class="btn btn-danger btn-lg" ng-click="resetUrls()" style="margin-left: 20px;">Reset</button>
+                </div>
+
+                <div class="col-md-6">
+                    <h2>Events to Add:</h2>
+                    <table id="event-table" class="table table-bordered">
+                        <tr>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                        <tr ng-repeat="event in events track by $index">
+                            <td>{{event.name}}</td>
+                            <td>{{event.place.name}}</td>
+                            <td>{{event.start_time}}</td>
+                            <td>{{event.end_time}}</td>
+                        </tr>
+                    </table>
+                    <p>
+                        <div onclick="alert('not implemented');" class="btn btn-default btn-lg" href="#" role="button">Add to Calendar</div>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <footer ng-include="'templates/footer.html'"></footer>
+
     </body>
 
 </html>
