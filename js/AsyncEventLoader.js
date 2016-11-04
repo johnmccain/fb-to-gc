@@ -1,7 +1,6 @@
-console.log('AsyncEventLoader loaded');
-
 /**
  * Handles the asynchronous loading of Facebook events through the FB graph API
+ * @deprecated
  */
 class AsyncEventLoader {
 	/**

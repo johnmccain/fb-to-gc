@@ -10,8 +10,8 @@
 
         <script src="https://use.fontawesome.com/28c2b7a853.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="https://connect.facebook.net/en_US/sdk.js"></script>
 
@@ -30,9 +30,6 @@
                 <br>
                 <fb:login-button show-faces="true" max-rows="1" size="large"></fb:login-button>
                 <br>
-                <br>
-                <button class="btn btn-info" ng-click="getLoginStatus()">Login Status</button>
-                <button class="btn btn-info" ng-click="getAccessToken()">Access Token</button>
             </div>
         </div>
 
@@ -72,9 +69,15 @@
                             <th>Start Time</th>
                             <th>End Time</th>
                         </tr>
+                        <tr ng-repeat="event in events track by $index">
+                            <td>{{event.name}}</td>
+                            <td>{{event.place.name}}</td>
+                            <td>{{event.start_time}}</td>
+                            <td>{{event.end_time}}</td>
+                        </tr>
                     </table>
                     <p>
-                        <div onclick="submitEvents();" class="btn btn-default btn-lg" href="#" role="button">Add to Calendar</div>
+                        <div onclick="alert('not implemented');" class="btn btn-default btn-lg" href="#" role="button">Add to Calendar</div>
                     </p>
                 </div>
             </div>

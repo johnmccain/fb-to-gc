@@ -1,92 +1,6 @@
 require('../style/style.scss');
 // require('../js/AsyncEventLoader.js');
 
-/**
- * Handles the asynchronous loading of Facebook events through the FB graph API
- */
-class AsyncEventLoader {
-	/**
-	 * Constructor for the AsyncEventLoader
-	 * @constructor
-	 * @param {Array} eventIds - An array of Facebook eventId strings to be loaded
-	 * @param {function} callback - A callback which should accept an array of objects with event data
-	 * @param {string} accessToken - The Facebook access token to be used
-	 */
-	constructor(eventIds, callback, accessToken) {
-
-		console.log('constructing AsyncEventLoader');
-		/**
-		 * An array of eventId strings
-		 * @type {Array}
-		 */
-		this.eventIds = eventIds;
-
-		/**
-		 * The callback to handle event data responses
-		 * @type {function}
-		 */
-		this.callback = callback;
-
-		/**
-		 * The Facebook access token to be used in loading these events
-		 * @type {string}
-		 */
-		this.accessToken = accessToken;
-
-		/**
-		 * An array of event objects to be filled as they are loaded
-		 */
-		this.events = [];
-
-		/**
-		 * The number of events to be loaded
-		 * @type {number}
-		 */
-		this.numEvents = this.eventIds.length;
-
-		/**
-		 * The number of events loaded
-		 * @type {number}
-		 */
-		this.numLoaded = 0;
-	}
-
-	/**
-	 * Initiates the loading process
-	 */
-	load() {
-		console.log('loading...\n' + this.eventIds.length);
-		for (let i = 0; i < this.eventIds.length; ++i) {
-			console.log('hello?');
-			this.loadEvent(this.eventIds[i], i);
-		}
-	}
-
-	/**
-	 * Loads an eventId and adds it to the list of events, calls the callback if all events loaded
-	 * @param {string} eventId - The eventId of the Facebook event to load
-	 * @param {number} index - the index in the loaded events array
-	 */
-	loadEvent(eventId, index) {
-		let _self = this;
-		console.log('API loading event with id ' + eventId);
-		FB.api(
-			"/" + eventId + '?' + _self.accessToken,
-			function(response) {
-				if (response && !response.error) {
-					_self.events[index] = response;
-					if (++_self.numLoaded == _self.numEvents) {
-						_self.callback(_self.events);
-					}
-				} else {
-					console.error('Error loading Facebook event with id: ' + eventId);
-					console.log(response);
-				}
-			}
-		);
-	}
-}
-
 var app = angular.module('fbtogc', []);
 
 window.fbAsyncInit = function() {
@@ -96,26 +10,10 @@ window.fbAsyncInit = function() {
 		version: 'v2.8'
 	});
 	FB.AppEvents.logPageView();
-	updateAccessToken();
+	let $scope = angular.element('[ng-controller=myCtrl]').scope();
+	$scope.getFBAuth();
 };
 
-function updateAccessToken() {
-	let $scope = angular.element(document.getElementById('event-table')).scope();
-	FB.getLoginStatus(function(response) {
-		console.log(response);
-		$scope.loginStatus = response;
-	});
-	window.setTimeout(function() {
-		console.log('getting accessToken');
-
-	}, 5000);
-	FB.getAuthResponse(function(response) {
-		console.log('responding');
-		console.log(response);
-		$scope.accessToken = response.accessToken;
-		console.log($scope.accessToken);
-	});
-}
 
 (function(d, s, id) {
 	var js, fjs = d.getElementsByTagName(s)[0];
@@ -128,7 +26,51 @@ function updateAccessToken() {
 	fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
-app.controller('myCtrl', function($scope) {
+
+/**
+ * Handles Facebook api authentication
+ */
+app.service('fbAuth', function() {
+	let _self = this;
+	this.auth = function() {
+		let def = new jQuery.Deferred();
+		FB.getLoginStatus(function(response) {
+			console.log(response);
+			def.resolve(response);
+		});
+		let prom = def.promise();
+		prom.connected = false;
+		return prom;
+	};
+});
+
+/**
+ * Handles the asynchronous loading of Facebook events through the FB graph API
+ */
+app.service('eventLoader', function() {
+	let _self = this;
+	this.loadEvent = function(eventId, accessToken) {
+		let def = new jQuery.Deferred();
+		FB.api('/' + eventId + '?access_token=' + accessToken, function(response) {
+			def.resolve(response);
+			//Do something with the result
+		});
+		let prom = def.promise();
+		prom.connected = false;
+		return prom;
+	};
+});
+
+app.controller('myCtrl', ['$scope', 'fbAuth', 'eventLoader', function($scope, fbAuth, eventLoader) {
+	$scope.getFBAuth = function() {
+		//TODO: automatically renew access token
+		let prom = fbAuth.auth();
+		prom.then(function(response) {
+			$scope.loginStatus = response.status;
+			$scope.accessToken = response.authResponse.accessToken;
+		});
+	};
+	$scope.events = [];
 	$scope.eventUrls = [{
 		val: ''
 	}];
@@ -147,7 +89,6 @@ app.controller('myCtrl', function($scope) {
 		if (!$scope.accessToken) {
 			alert('You must be logged in via Facebook in order to gather event data');
 		} else {
-			console.log('processing urls');
 			let eventIds = [];
 			for (let i = 0; i < $scope.eventUrls.length; ++i) {
 				let startIndex = $scope.eventUrls[i].val.indexOf("/events/");
@@ -162,19 +103,24 @@ app.controller('myCtrl', function($scope) {
 					console.error('URL ' + (i + 1) + ' is not a facebook event (' + $scope.eventUrls[i].val + ')');
 				}
 			}
-
-			let eventLoader = new AsyncEventLoader(eventIds, function(events) {
-				console.log('Events loaded! \n' + events);
-			}, $scope.accessToken);
-
-			eventLoader.load();
+			if (!$scope.accessToken) {
+				//TODO: disable "process urls" button until access token is granted
+				console.log('no access token in $scope');
+			}
+			for (let i = 0; i < eventIds.length; ++i) {
+				console.log('Trying to load event with id: ' + eventIds[i]);
+				let prom = eventLoader.loadEvent(eventIds[i], $scope.accessToken);
+				//TODO: handle failed requests
+				prom.then(function(response) {
+					//TODO: handle error responses
+					console.log(response);
+					$scope.events.push(response);
+					$scope.$apply();
+				});
+			}
 		}
 	};
 	$scope.resetUrls = function() {
 		$scope.eventUrls = [''];
 	};
-	$scope.hello = function() {
-		console.log($scope.eventUrls);
-	};
-
-});
+}]);
