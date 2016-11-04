@@ -27,7 +27,12 @@
                 <h1>Facebook Event Importer for Google Calendar</h1>
                 <br>
                 <p>This will add an event to your Google Calendar from a Facebook event link.</p>
-                <button class="btn btn-primary" ng-click="hello();">Login with Facebook</button>
+                <br>
+                <fb:login-button show-faces="true" max-rows="1" size="large"></fb:login-button>
+                <br>
+                <br>
+                <button class="btn btn-info" ng-click="getLoginStatus()">Login Status</button>
+                <button class="btn btn-info" ng-click="getAccessToken()">Access Token</button>
             </div>
         </div>
 
@@ -39,7 +44,7 @@
                         <label for="eventurl{{$index + 1}}">Event
                             {{$index + 1}}:</label>
                         <br>
-                        <input class="form-control url-input" ng-model="url.val" id="eventurl{{$index + 1}}"/>
+                        <input type="text" class="form-control url-input" ng-model="url.val" id="eventurl{{$index + 1}}"/>
                         <button class="url-btn btn btn-danger" ng-click="removeURL($index);">
                             <i class="fa fa-minus" aria-hidden="true"></i>
                         </button>
